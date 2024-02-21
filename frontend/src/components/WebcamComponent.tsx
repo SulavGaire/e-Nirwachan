@@ -8,7 +8,7 @@ const videoConstraints = {
     facingMode: "user"
 };
 
-const WebcamCapture = () => {
+const WebcamCapture = ({ onCapturedImage }) => {
     const webcamRef = React.useRef(null);
     const [capturedImage, setCapturedImage] = React.useState(null);
 
@@ -16,6 +16,11 @@ const WebcamCapture = () => {
         const imageSrc = (webcamRef.current as any)?.getScreenshot();
         setCapturedImage(imageSrc);
     }, [webcamRef]);
+
+    const sendDataToParent = () => {
+        onCapturedImage(capturedImage);
+
+    };
 
     return (
         <>
@@ -33,7 +38,7 @@ const WebcamCapture = () => {
                 </div>
                 <div className="p-2">
                     {capturedImage && <img src={capturedImage} alt="Captured Image" />}
-                    <Button onClick={capture} className="mt-2">Upload</Button>
+                    <Button onClick={sendDataToParent} className="mt-2">Upload</Button>
                 </div>
             </div>
         </>

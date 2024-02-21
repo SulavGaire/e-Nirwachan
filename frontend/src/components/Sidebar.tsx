@@ -1,5 +1,5 @@
 import React from 'react'
-import { Camera, LayoutDashboard, NotebookPen, Settings } from 'lucide-react'
+import { Camera, LayoutDashboard, NotebookPen, Settings, Vote, VoteIcon } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { useLocation } from 'react-router-dom';
 import { cn } from '@/lib/utils'
@@ -18,9 +18,9 @@ const routes = [
         color: "text-yellow-500"
     },
     {
-        label: "Camera",
-        icons: Camera,
-        href: '/WebcamCapture',
+        label: "Voting",
+        icons: Vote,
+        href: '/Voting',
         color: "text-red-500"
     },
     {
@@ -40,7 +40,7 @@ const Sidebar = () => {
                 <Link to="/" className='flex items-center pl-3 mb-14'>
                     <div className='relative w-8 h-8 mr-4'>
                         <img
-                            src="./../../public/Logo.png"
+                            src="/Logo.png"
                             alt="avatar"
                             className='w-full h-full'
                         />

@@ -3,10 +3,10 @@ import WebcamCapture from './components/WebcamComponent'
 import Layout from './Layout'
 import NoPage from './NoPage'
 import { Register } from './components/Register'
-
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import React from 'react'
 import Dashboard from './components/dashboard/dashboard'
+import Voting from './components/voting/voting'
 
 
 function App() {
@@ -15,7 +15,6 @@ function App() {
   return (
     <BrowserRouter>
       {isAuthenticated ? <AfterAuthRoutes /> : <BeforeAuthRoutes />}
-
     </BrowserRouter>
   )
 }
@@ -27,7 +26,7 @@ const AfterAuthRoutes = () => {
     <Routes>
       <Route path="/" element={<Layout />}>
         <Route index element={<Register />} />
-        <Route path="WebcamCapture" element={<WebcamCapture />} />
+        <Route path="Voting" element={<Voting />} />
         <Route path="Register" element={<Register />} />
         <Route path="*" element={<NoPage />} />
       </Route>
@@ -46,7 +45,7 @@ const BeforeAuthRoutes = () => {
     <Routes>
       <Route path="/" element={<Layout />}>
         <Route index element={<Dashboard />} />
-        <Route path="WebcamCapture" element={<WebcamCapture />} />
+        <Route path="Voting" element={<Voting />} />
         <Route path="Register" element={<Register />} />
         <Route path="*" element={<NoPage />} />
       </Route>

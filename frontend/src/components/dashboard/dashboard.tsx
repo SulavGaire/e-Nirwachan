@@ -4,7 +4,7 @@ const Dashboard = () => {
     return (
         <div className="flex flex-row justify-center">
             <div className="size-12">
-                <img src="./../../../public/Logo.png" alt="nepal logo" className="w-full h-full' pr-2 " />
+                <img src="/Logo.png" alt="nepal logo" className="w-full h-full' pr-2 " />
             </div>
             <h1 className="font-semibold font-sans text-center text-2xl mb-3">
                 Welcome To<span className="text-red-500 font-bold"> E - निर्वाचन </span>
