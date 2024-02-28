@@ -16,7 +16,9 @@ import {
     FormMessage,
 } from "@/components/ui/form"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
-import { toast } from "@/components/ui/use-toast"
+import { useToast } from "@/components/ui/use-toast"
+import { DevTool } from "@hookform/devtools"
+
 
 const FormSchema = z.object({
     type: z.enum(["aakhil", "nebi", "kranti"], {
@@ -26,19 +28,18 @@ const FormSchema = z.object({
 
 const Voting = () => {
 
+    const { toast } = useToast()
+
     const form = useForm<z.infer<typeof FormSchema>>({
         resolver: zodResolver(FormSchema),
     })
 
     function onSubmit(data: z.infer<typeof FormSchema>) {
+        console.log(data);
         toast({
-            title: "You submitted the following values:",
-            description: (
-                <pre className="mt-2 w-[340px] rounded-md bg-slate-950 p-4">
-                    <code className="text-white">{JSON.stringify(data, null, 2)}</code>
-                </pre>
-            ),
-        })
+            title: "Voting Success",
+            description: <>You voted to <span style={{ color: 'red', fontWeight: 'bold' }}>{data.type}</span>. Thanks for your participation!</>,
+        });
     }
     return (
         <div className="flex flex-col justify-center items-center px-3">
@@ -107,6 +108,7 @@ const Voting = () => {
                     />
                     <Button type="submit">Submit</Button>
                 </form>
+                <DevTool control={form.control} />
             </Form>
 
         </div>

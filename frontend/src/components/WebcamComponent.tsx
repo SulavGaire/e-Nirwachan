@@ -19,7 +19,6 @@ const WebcamCapture = ({ onCapturedImage }) => {
 
     const sendDataToParent = () => {
         onCapturedImage(capturedImage);
-
     };
 
     return (

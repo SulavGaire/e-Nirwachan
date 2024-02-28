@@ -23,6 +23,7 @@ import {
     DialogTitle,
     DialogTrigger,
 } from "@/components/ui/dialog"
+
 import { Input } from "@/components/ui/input"
 import { Progress } from "@/components/ui/progress"
 import { useState } from "react"
@@ -64,7 +65,7 @@ export function Register() {
     const handleCapturedImage = (data: string) => {
         console.log('Received data from child:', data);
         setImage(data);
-        form.setValue('image', data, { shouldDirty: true, shouldTouch: true, shouldValidate: true })
+        // form.setValue('image', data, { shouldDirty: true, shouldTouch: true, shouldValidate: true })
     };
 
     return (
@@ -136,39 +137,55 @@ export function Register() {
                                 </FormItem>
                             )}
                         />
+                        <FormField
+                            control={form.control}
+                            name="image"
+                            render={({ field }) => (
+                                field.name = "image",
+                                field.value = image,
+                                <>
+                                    <FormItem>
+                                        <FormLabel />
+                                        <FormControl>
+                                            {/* <Input type="image"  src="/images/upload-button.png"  alt="Upload Button" onClick={handleImageClick */}
+                                            <img src={field.value} alt="image" />
+                                        </FormControl>
+                                        <FormDescription />
+                                        <FormMessage />
+                                    </FormItem>
+                                </>
+                            )} />
 
-                        <img src={image} alt="image" {...form.register("image")} />
                         <Dialog>
                             <DialogTrigger>
                                 <Button variant="outline" className='m-8'>
                                     Open Camera
                                 </Button>
                             </DialogTrigger>
-                        </Dialog>
+                            <DialogContent>
+                                <DialogHeader>
+                                    <DialogTitle>Capture image</DialogTitle>
 
-                        <Button type="submit" className="m-8">Submit</Button>
+                                    <DialogDescription>
+                                    </DialogDescription>
+
+                                </DialogHeader>
+                                <WebcamCapture onCapturedImage={handleCapturedImage} />
+                                <DialogFooter>
+                                    <DialogClose asChild>
+                                        <Button type="button" variant="secondary">
+                                            Close
+                                        </Button>
+                                    </DialogClose>
+                                </DialogFooter>
+                            </DialogContent>
+                        </Dialog>
+                        <div>
+                            <Button type="submit" className="m-8">Submit</Button>
+                        </div>
                     </form>
                     <DevTool control={form.control} />
                 </Form>
-                <Dialog>
-                    <DialogContent>
-                        <DialogHeader>
-                            <DialogTitle>Capture image</DialogTitle>
-
-                            <DialogDescription>
-                            </DialogDescription>
-
-                        </DialogHeader>
-                        <WebcamCapture onCapturedImage={handleCapturedImage} />
-                        <DialogFooter>
-                            <DialogClose asChild>
-                                <Button type="button" variant="secondary">
-                                    Close
-                                </Button>
-                            </DialogClose>
-                        </DialogFooter>
-                    </DialogContent>
-                </Dialog>
             </div>
         </div>
     )

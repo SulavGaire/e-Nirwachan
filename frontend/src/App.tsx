@@ -1,20 +1,23 @@
 import './App.css'
-import WebcamCapture from './components/WebcamComponent'
 import Layout from './Layout'
 import NoPage from './NoPage'
 import { Register } from './components/Register'
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import React from 'react'
 import Dashboard from './components/dashboard/dashboard'
-import Voting from './components/voting/voting'
+import Voting from './Pages/Voting/Voting'
+// import Voting from './components/voting/voting'
+import { Toaster } from "@/components/ui/toaster"
+import Login from './Pages/Login'
+import { useAuth } from './contexts/AuthContext';
+
 
 
 function App() {
-  const [isAuthenticated, setIsAuthenticated] = React.useState(false)
-
+  const { isAuthenticated } = useAuth();
   return (
     <BrowserRouter>
       {isAuthenticated ? <AfterAuthRoutes /> : <BeforeAuthRoutes />}
+      <Toaster />
     </BrowserRouter>
   )
 }
@@ -25,7 +28,7 @@ const AfterAuthRoutes = () => {
   return (
     <Routes>
       <Route path="/" element={<Layout />}>
-        <Route index element={<Register />} />
+        <Route index element={<Dashboard />} />
         <Route path="Voting" element={<Voting />} />
         <Route path="Register" element={<Register />} />
         <Route path="*" element={<NoPage />} />
@@ -47,6 +50,7 @@ const BeforeAuthRoutes = () => {
         <Route index element={<Dashboard />} />
         <Route path="Voting" element={<Voting />} />
         <Route path="Register" element={<Register />} />
+        <Route path="Login" element={<Login />} />
         <Route path="*" element={<NoPage />} />
       </Route>
     </Routes>

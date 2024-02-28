@@ -3,8 +3,10 @@ import { Camera, LayoutDashboard, NotebookPen, Settings, Vote, VoteIcon } from '
 import { Link } from 'react-router-dom'
 import { useLocation } from 'react-router-dom';
 import { cn } from '@/lib/utils'
+import { Toaster } from "@/components/ui/toaster"
+import { useAuth } from '@/contexts/AuthContext';
 
-const routes = [
+const AfterAuthRoutes = [
     {
         label: "Dashboard",
         icons: LayoutDashboard,
@@ -31,7 +33,37 @@ const routes = [
     },
 ]
 
+const BeforeAuthRoutes = [
+    {
+        label: "Dashboard",
+        icons: LayoutDashboard,
+        href: '/',
+        color: "text-sky-500"
+    },
+    // {
+    //     label: "Register",
+    //     icons: NotebookPen,
+    //     href: '/Register',
+    //     color: "text-yellow-500"
+    // },
+    {
+        label: "Voting",
+        icons: Vote,
+        href: '/Voting',
+        color: "text-red-500"
+    },
+    {
+        label: "Setting",
+        icons: Settings,
+        href: '/*',
+        color: "text-emerald-500"
+    },
+]
+
 const Sidebar = () => {
+    let routes;
+    const { isAuthenticated } = useAuth();
+    isAuthenticated ? routes = AfterAuthRoutes : routes = BeforeAuthRoutes
     const location = useLocation();
     console.log(location.pathname);
     return (
