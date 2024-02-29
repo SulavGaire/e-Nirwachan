@@ -58,15 +58,16 @@ uint8_t readnumber(void) {
 void loop() {
   if (Serial.available() > 0) {
     String command = Serial.readString();
-    if (command == "E") {
+    if (command == "Register") {
       enrollFingerprint();
-    } else if (command == "C") {
+    } else if (command == "Voting") {
       checkFingerprint();
     }
   }
 }
 
 void enrollFingerprint() {
+  while(true){
   Serial.println("Ready to enroll a fingerprint!");
   Serial.println("Please type in the ID # (from 1 to 127) you want to save this finger as...");
   id = readnumber();
@@ -77,6 +78,9 @@ void enrollFingerprint() {
   Serial.println(id);
 
   while (! getFingerprintEnroll() );
+  delay(50); 
+  }
+  
 }
 
 
@@ -282,8 +286,10 @@ uint8_t getFingerprintID() {
   }
 
   // found a match!
+  Serial.println("");
   Serial.print("Found ID #"); Serial.print(finger.fingerID);
   Serial.print(" with confidence of "); Serial.println(finger.confidence);
+  Serial.println(finger.fingerID);
 
   return finger.fingerID;
 }

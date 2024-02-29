@@ -26,7 +26,7 @@ const FormSchema = z.object({
     }),
 })
 
-const Voting = () => {
+const VotingComponent = () => {
 
     const { toast } = useToast()
 
@@ -115,4 +115,4 @@ const Voting = () => {
     )
 }
 
-export default Voting
+export default VotingComponent

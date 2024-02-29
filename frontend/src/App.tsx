@@ -9,6 +9,7 @@ import Voting from './Pages/Voting/Voting'
 import { Toaster } from "@/components/ui/toaster"
 import Login from './Pages/Login'
 import { useAuth } from './contexts/AuthContext';
+import Suresh from './Pages/Suresh2';
 
 
 
@@ -16,6 +17,7 @@ function App() {
   const { isAuthenticated } = useAuth();
   return (
     <BrowserRouter>
+      {/* <Suresh /> */}
       {isAuthenticated ? <AfterAuthRoutes /> : <BeforeAuthRoutes />}
       <Toaster />
     </BrowserRouter>
@@ -34,13 +36,6 @@ const AfterAuthRoutes = () => {
         <Route path="*" element={<NoPage />} />
       </Route>
     </Routes>
-    // <Routes>
-    //   <Route exact path="/" element={<Home />} />
-    //   <Route path="/profile/" element={<Profile />} />
-    //   <Route path="/update/" element={<Update />} />
-    //   <Route path="/delete" element={<DeleteUser />} />
-    //   <Route path="/*" element={<Navigate replace to="/" />} />
-    // </Routes>
   );
 };
 const BeforeAuthRoutes = () => {
