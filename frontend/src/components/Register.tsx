@@ -1,6 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
-import { DevTool } from "@hookform/devtools"
 import { z } from "zod"
 
 import { Button } from "@/components/ui/button"
@@ -13,21 +12,9 @@ import {
     FormLabel,
     FormMessage,
 } from "@/components/ui/form"
-import {
-    Dialog,
-    DialogClose,
-    DialogContent,
-    DialogDescription,
-    DialogFooter,
-    DialogHeader,
-    DialogTitle,
-    DialogTrigger,
-} from "@/components/ui/dialog"
 
 import { Input } from "@/components/ui/input"
-import { Progress } from "@/components/ui/progress"
-import { useState } from "react"
-import WebcamCapture from "./WebcamComponent"
+
 
 
 const formSchema = z.object({
@@ -41,12 +28,9 @@ const formSchema = z.object({
     CitizenshipNumber: z.string().min(10, {
         message: "CitizenshipNumber must be at least 10 characters.",
     }),
-    image: z.string()
 })
 
-export function Register() {
-    const [progress, setProgress] = useState(1)
-    const [image, setImage] = useState("" as string)
+export function Register({ onCapturedRegister }) {
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
         defaultValues: {
@@ -58,27 +42,15 @@ export function Register() {
         },
     })
     function onSubmit(values: z.infer<typeof formSchema>) {
-        setProgress(33);
         console.log(values);
+        onCapturedRegister(values);
     }
-
-    const handleCapturedImage = (data: string) => {
-        console.log('Received data from child:', data);
-        setImage(data);
-        // form.setValue('image', data, { shouldDirty: true, shouldTouch: true, shouldValidate: true })
-    };
 
     return (
         <div className="flex flex-col justify-center items-center px-3">
-            <div className="flex flex-row justify-center">
-                <h1 className="font-semibold font-sans text-center text-2xl mb-3">
-                    Welcome To Voter Pre-Registration
-                </h1>
-            </div>
+
             <div className="flex flex-col justify-center items-center ">
                 <Form {...form} >
-                    {/* <p>Progress Bar</p> */}
-                    <Progress className="mb-3" value={progress} />
                     <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-1">
                         <div className="flex flex-col md:flex-row md:min-w-full gap-4">
                             <FormField
@@ -86,7 +58,7 @@ export function Register() {
                                 name="FirstName"
                                 render={({ field }) => (
                                     <FormItem>
-                                        <FormLabel>FirstName</FormLabel>
+                                        <FormLabel>First Name</FormLabel>
                                         <FormControl>
                                             <Input placeholder="Suresh" {...field} />
                                         </FormControl>
@@ -99,7 +71,7 @@ export function Register() {
                                 name="MiddleName"
                                 render={({ field }) => (
                                     <FormItem>
-                                        <FormLabel>MiddleName</FormLabel>
+                                        <FormLabel>Middle Name</FormLabel>
                                         <FormControl>
                                             <Input placeholder="Thapa" {...field} />
                                         </FormControl>
@@ -112,7 +84,7 @@ export function Register() {
                                 name="LastName"
                                 render={({ field }) => (
                                     <FormItem>
-                                        <FormLabel>LastName</FormLabel>
+                                        <FormLabel>Last Name</FormLabel>
                                         <FormControl>
                                             <Input placeholder="Magar" {...field} />
                                         </FormControl>
@@ -137,54 +109,11 @@ export function Register() {
                                 </FormItem>
                             )}
                         />
-                        <FormField
-                            control={form.control}
-                            name="image"
-                            render={({ field }) => (
-                                field.name = "image",
-                                field.value = image,
-                                <>
-                                    <FormItem>
-                                        <FormLabel />
-                                        <FormControl>
-                                            {/* <Input type="image"  src="/images/upload-button.png"  alt="Upload Button" onClick={handleImageClick */}
-                                            <img src={field.value} alt="image" />
-                                        </FormControl>
-                                        <FormDescription />
-                                        <FormMessage />
-                                    </FormItem>
-                                </>
-                            )} />
 
-                        <Dialog>
-                            <DialogTrigger>
-                                <Button variant="outline" className='m-8'>
-                                    Open Camera
-                                </Button>
-                            </DialogTrigger>
-                            <DialogContent>
-                                <DialogHeader>
-                                    <DialogTitle>Capture image</DialogTitle>
-
-                                    <DialogDescription>
-                                    </DialogDescription>
-
-                                </DialogHeader>
-                                <WebcamCapture onCapturedImage={handleCapturedImage} />
-                                <DialogFooter>
-                                    <DialogClose asChild>
-                                        <Button type="button" variant="secondary">
-                                            Close
-                                        </Button>
-                                    </DialogClose>
-                                </DialogFooter>
-                            </DialogContent>
-                        </Dialog>
                         <div>
                             <Button type="submit" className="m-8">Submit</Button>
                         </div>
                     </form>
-                    <DevTool control={form.control} />
                 </Form>
             </div>
         </div>

@@ -1,52 +1,55 @@
-import React, { useRef } from 'react';
-import Webcam from 'react-webcam';
-import axios from 'axios';
+import React, { useState, useRef } from "react";
+import Webcam from "react-webcam";
+import axios from "axios";
 
-const CaptureImage: React.FC = () => {
-    const webcamRef = useRef<Webcam>(null);
-    const [image, setImage] = React.useState('');
+const CaptureImage = () => {
+    const webcamRef = useRef(null);
+    const [image, setImage] = useState(null);
 
     const capture = () => {
-        const imageSrc = webcamRef.current?.getScreenshot();
-        if (imageSrc) {
-            // Send the captured image to the backend
-            sendImageToBackend(imageSrc);
-            setImage(imageSrc);
-        }
+        const imageSrc = webcamRef.current.getScreenshot();
+        setImage(imageSrc);
+        console.log(imageSrc);
     };
 
-    const sendImageToBackend = (imageData: string) => {
-        console.log(imageData);
-        // Create FormData object
-        const formData = new FormData();
-        // Append the image data
-        formData.append('image', imageData);
-        console.log("{Formdata}", formData);
-        // Make a POST request to your backend
-        axios.post('http://192.168.16.101:8000/register/', formData, {
-            headers: {
-                'Content-Type': 'multipart/form-data'
+    const handleUpload = () => {
+        if (image) {
+            // Convert base64 image data to blob
+            const byteCharacters = atob(image.split(",")[1]);
+            const byteNumbers = new Array(byteCharacters.length);
+            for (let i = 0; i < byteCharacters.length; i++) {
+                byteNumbers[i] = byteCharacters.charCodeAt(i);
             }
-        })
-            .then(response => {
-                console.log(response.data);
-                // Handle response as needed
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                // Handle error
-            });
+            const byteArray = new Uint8Array(byteNumbers);
+            const blob = new Blob([byteArray], { type: "image/jpeg" });
+
+            // Create FormData object and append the blob
+            const formData = new FormData();
+            formData.append("image", blob, "image.jpg");
+
+            // Send the FormData to the backend
+            axios
+                .post("http://localhost:8000/register/", formData, {
+                    headers: {
+                        "Content-Type": "multipart/form-data",
+                    },
+                })
+                .then((response) => {
+                    console.log(response.data);
+                })
+                .catch((error) => {
+                    console.error("Error:", error);
+                });
+        } else {
+            console.error("No image captured");
+        }
     };
 
     return (
         <div>
-            <Webcam
-                audio={false}
-                ref={webcamRef}
-                screenshotFormat="image/jpeg"
-            />
+            <Webcam audio={false} ref={webcamRef} screenshotFormat="image/jpeg" />
             <button onClick={capture}>Capture</button>
-            <img src={image} alt="Captured Image" />
+            <button onClick={handleUpload}>Upload Image</button>
         </div>
     );
 };

@@ -1,6 +1,6 @@
 import React from 'react'
 
-const Dashboard = () => {
+const Title = () => {
     return (
         <div className="flex flex-row justify-center">
             <div className="size-12">
@@ -13,4 +13,4 @@ const Dashboard = () => {
     )
 }
 
-export default Dashboard
+export default Title

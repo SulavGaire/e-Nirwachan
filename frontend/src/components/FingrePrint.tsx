@@ -1,10 +1,10 @@
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Fingerprint } from 'lucide-react';
-import { useEffect, useState } from 'react';
-import { string } from 'zod';
+import { useState } from 'react';
+import { Label } from './ui/label';
 
-function FingrePrint({ uses }) {
+function FingrePrint({ uses, onCapturedFingrePrint }: { uses: any, onCapturedFingrePrint?: any }) {
     const [data, setData] = useState<string>("First Connect and Start Scanning");
     const [command, setCommand] = useState(uses);
     const [id, setID] = useState<any>();
@@ -50,26 +50,32 @@ function FingrePrint({ uses }) {
                 if (value.includes('\n')) {
                     if (chunkedData.includes('Found ID #')) {
                         setIDFound(chunkedData);
-                        const string = idFound;
-                        const regex = /#(\d+)/;
-                        const match = string.match(regex);
+                        const str = "Found ID #1 with confidence of 185";
+                        const regex = /ID #(\d+) /;
+                        const match = str.match(regex);
 
-                        if (match && match[1]) {
-                            const numberAfterHash = parseInt(match[1]);
-                            console.log(numberAfterHash);
-                            setID(numberAfterHash);
+                        if (match) {
+                            const number = match[1];
+                            setID(number);
+                            onCapturedFingrePrint(number)
+                            reader.releaseLock();
+                            break;
+
                         } else {
-                            console.log("No number after # found.");
+                            console.log("No match found.");
                         }
                     }
-                    if (chunkedData.includes('Stored!')) {
+                    if (chunkedData.includes('Stor')) {
                         setStored(chunkedData);
+                        onCapturedFingrePrint(command)
+                        reader.releaseLock();
+                        break;
                     }
                     setData(chunkedData);
                     chunkedData = "";
                 }
                 chunkedData = chunkedData + value;
-                console.log(value);
+                console.log(chunkedData);
             }
         } catch (error) {
             // Handle error...
@@ -104,9 +110,11 @@ function FingrePrint({ uses }) {
     }
 
     return (
-        <div>
-            <Button className="m-5" onClick={connectToSerialPort}>Connect</Button>
-            <Button className="m-5" onClick={closeSerialPort}>Disconnect</Button>
+        <div className='flex flex-col gap-y-5'>
+            <div className='flex flex-row gap-x-5 justify-center'>
+                <Button onClick={connectToSerialPort}>Connect</Button>
+                <Button onClick={closeSerialPort}>Disconnect</Button>
+            </div>
             {/* <Button className="m-5" onClick={readFromSerialPort}>Read</Button> */}
             {uses === 'Voting' ? null : <Input
                 type="text"
@@ -114,18 +122,21 @@ function FingrePrint({ uses }) {
                 onChange={(e) => setCommand(e.target.value)}
             />}
 
-            <Button className="m-5" onClick={() => writeToSerialPort(command)}>{uses === 'Voting' ? 'Start Scanning' : 'Write/Scanning'}</Button>
+            <Button onClick={() => writeToSerialPort(command)}>{uses === 'Voting' ? 'Start Scanning' : 'Write/Scanning'}</Button>
             <div className='flex flex-col justify-center items-center gap-5 mt-5'>
                 <div className='flex flex-row gap-x-5'>
                     <Fingerprint
                         height={100}
                         width={100}
                     />
-                    {idFound ? <p className='text-lg bg-slate-300 rounded-lg p-8'>{id}</p> : null}
-                    {stored ? <p className='text-lg bg-slate-300 rounded-lg p-8'>{stored + " to " + command}</p> : null}
+                    {idFound ? <p className='text-lg bg-slate-300 rounded-lg p-8'>ID : {id} detected <span className='text-red-500'> PRESS NEXT</span></p> : null}
+                    {stored ? <p className='text-lg bg-slate-300 rounded-lg p-8'>{stored + " to" + command}</p> : null}
 
                 </div>
-                <p className='text-base items-center'>{data}</p>
+                <div className='p-3 border-[1px] rounded-lg'>
+                    <Label>Output of arduino</Label>
+                    <p className='text-base items-center'>{data}</p>
+                </div>
             </div>
 
             {/* <button onClick={() => writeToSerialPort('Hello, Serial!')}>Write to Serial Port</button> */}

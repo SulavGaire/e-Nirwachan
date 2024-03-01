@@ -8,13 +8,13 @@ import { useAuth } from '@/contexts/AuthContext';
 
 const AfterAuthRoutes = [
     {
-        label: "Dashboard",
+        label: "Admin Dashboard",
         icons: LayoutDashboard,
         href: '/',
         color: "text-sky-500"
     },
     {
-        label: "Register",
+        label: "Candidate Register",
         icons: NotebookPen,
         href: '/Register',
         color: "text-yellow-500"
@@ -35,17 +35,17 @@ const AfterAuthRoutes = [
 
 const BeforeAuthRoutes = [
     {
-        label: "Dashboard",
+        label: "User Dashboard",
         icons: LayoutDashboard,
         href: '/',
         color: "text-sky-500"
     },
-    // {
-    //     label: "Register",
-    //     icons: NotebookPen,
-    //     href: '/Register',
-    //     color: "text-yellow-500"
-    // },
+    {
+        label: "Voter Register",
+        icons: NotebookPen,
+        href: '/Register',
+        color: "text-yellow-500"
+    },
     {
         label: "Voting",
         icons: Vote,

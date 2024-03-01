@@ -3,8 +3,8 @@ import WebcamCapture from '@/components/WebcamComponent';
 import { motion } from 'framer-motion'
 import { useState } from 'react';
 import { Label } from '@/components/ui/label';
-import VotingComponent from '@/components/voting/VotingComponent';
 import axios from 'axios';
+import { Register } from '@/components/Register';
 
 const steps = [
     {
@@ -17,20 +17,14 @@ const steps = [
     },
     {
         id: 'Step 3',
-        name: 'Voting',
+        name: 'Register',
     }
 ]
 
-const options = [
-    { value: 'Aakhil', avatar: 'https://th.bing.com/th/id/OIP.PPJ5FAl38tVVP-qGavD8tQHaE4?rs=1&pid=ImgDetMain', alt: 'Aakhil' },
-    { value: 'Nebi', avatar: 'https://th.bing.com/th/id/OIP.tAXbbQpns_qJ1bk_ZMy-9QAAAA?rs=1&pid=ImgDetMain', alt: 'Nebi' },
-    { value: 'Krantikari', avatar: 'https://th.bing.com/th/id/OIP.DauOLnEL1Lp9zx8pmUNQkwHaE0?rs=1&pid=ImgDetMain', alt: 'Krantikari' }
-];
-
-function Voting() {
-    const [id, setID] = useState(1);
+function RegisterVoter() {
+    const [id, setID] = useState<any>();
     const [image, setImage] = useState<string>('');
-    const [votingData, setVotingData] = useState<string>('');
+    const [registerData, setRegisterData] = useState<string>('');
     const [previousStep, setPreviousStep] = useState(0)
     const [currentStep, setCurrentStep] = useState(0)
     const delta = currentStep - previousStep
@@ -44,60 +38,60 @@ function Voting() {
         console.log('Received data from image:', data);
         setImage(data);
     };
-    const handleCapturedVotingData = (votingData) => {
-        console.log('Received data from voting:', votingData);
-        setVotingData(votingData)
+    const handleCapturedRegister = (registerDataa) => {
+        console.log('Received data from voting:', registerDataa);
+        setRegisterData(registerDataa)
+        if (registerData) {
+            // Convert base64 image data to blob
+            const byteCharacters = atob(image.split(",")[1]);
+            const byteNumbers = new Array(byteCharacters.length);
+            for (let i = 0; i < byteCharacters.length; i++) {
+                byteNumbers[i] = byteCharacters.charCodeAt(i);
+            }
+            const byteArray = new Uint8Array(byteNumbers);
+            const blob = new Blob([byteArray], { type: "image/jpeg" });
+
+            // Create FormData object and append the blob
+            const formData = new FormData();
+            formData.append("imageid", blob, "image.jpg");
+            formData.append("fingerid", 1);
+            formData.append("registerData", registerData);
+            console.log("FORMDATA:", formData);
+            axios
+                .post("http://192.168.16.101:8000/register/", formData, {
+                    headers: {
+                        "Content-Type": "multipart/form-data",
+                    },
+                })
+                .then((response) => {
+                    console.log(response.data);
+                })
+                .catch((error) => {
+                    console.error("Error:", error);
+                });
+        }
     };
     console.log("Current Step : ", currentStep);
 
     const next = async () => {
 
 
-        if (currentStep < steps.length - 1) {
+        if (currentStep < steps.length) {
             if (currentStep === 0) {
                 if (image === '') {
                     alert("Please capture your Image");
                     return;
                 }
             }
-            if (currentStep === 1) {
-                if (id === '') {
-                    alert("Please capture your fingreprint");
-                    return;
-                }
-                if (id) {
-                    // Convert base64 image data to blob
-                    const byteCharacters = atob(image.split(",")[1]);
-                    const byteNumbers = new Array(byteCharacters.length);
-                    for (let i = 0; i < byteCharacters.length; i++) {
-                        byteNumbers[i] = byteCharacters.charCodeAt(i);
-                    }
-                    const byteArray = new Uint8Array(byteNumbers);
-                    const blob = new Blob([byteArray], { type: "image/jpeg" });
-
-                    // Create FormData object and append the blob
-                    const formData = new FormData();
-                    formData.append("imageid", blob, "image.jpg");
-                    formData.append("fingerid", id);
-                    formData.append("votingdata", "apple");
-                    console.log("FORMDATA:", formData);
-                    axios
-                        .post("http://192.168.16.101:8000/auth/", formData, {
-                            headers: {
-                                "Content-Type": "multipart/form-data",
-                            },
-                        })
-                        .then((response) => {
-                            console.log(response.data);
-                        })
-                        .catch((error) => {
-                            console.error("Error:", error);
-                        });
-                }
-            }
+            // if (currentStep === 1) {
+            //     if (id === '') {
+            //         alert("Please capture your fingreprint");
+            //         return;
+            //     }
+            // }
             if (currentStep === 2) {
-                console.log("Voting Data : ", votingData);
-                if (votingData === '') {
+                console.log("Voting Data : ", registerData);
+                if (registerData === '') {
                     alert("Please capture your fingreprint");
                     return;
                 }
@@ -120,7 +114,7 @@ function Voting() {
                 {/* steps */}
                 <div className="flex flex-row justify-center">
                     <h1 className="font-semibold font-sans text-center text-3xl p-5 mb-5">
-                        Welcome To <span className='text-red-500'>Voting</span> Page
+                        Welcome To <span className='text-red-500'>Voter Pre-Registration</span> page
                     </h1>
                 </div>
                 <nav aria-label='Progress'>
@@ -165,10 +159,10 @@ function Voting() {
                     >
                         <div className='p-2 my-6'>
                             <h2 className='text-xl font-semibold leading-7 text-gray-900'>
-                                Image capture
+                                Image Register
                             </h2>
                             <p className='mt-1 text-sm leading-6 text-gray-600 '>
-                                Please your capture image for verifacation  purpose.
+                                Please your capture image for Registration  purpose.
                             </p>
                         </div>
                         <div className='flex flex-col justify-center items-center'>
@@ -189,16 +183,22 @@ function Voting() {
                         animate={{ x: 0, opacity: 1 }}
                         transition={{ duration: 0.3, ease: 'easeInOut' }}
                     >
-                        <div className='p-2 my-6'>
+                        <div className='p-2 my-6 flex flex-col'>
                             <h2 className='text-xl font-semibold leading-7 text-gray-900'>
-                                Fingreprint capture
+                                Fingreprint Registration
                             </h2>
                             <p className='mt-1 text-sm leading-6 text-gray-600 '>
-                                Please your place your fingre in sensor.
+                                1. Connect your fingreprint device to your computer.
+                                <br />
+                                2. press Write/Scanning button.
+                                <br />
+                                3. Enter id between 1 to 123 and click "Write/Scanning" button.
+                                <br />
+                                3. Register your fingreprint until stored message is shown.
                             </p>
                         </div>
                         <div className='flex flex-col justify-center items-center'>
-                            <FingrePrint uses='Voting' onCapturedFingrePrint={handleCapturedFingrePrint} />
+                            <FingrePrint uses='Register' onCapturedFingrePrint={handleCapturedFingrePrint} />
                         </div>
                     </motion.div>
                 )}
@@ -211,14 +211,14 @@ function Voting() {
                     >
                         <div className='p-2 my-6'>
                             <h2 className='text-xl font-semibold leading-7 text-gray-900'>
-                                Voting
+                                Register
                             </h2>
                             <p className='mt-1 text-sm leading-6 text-gray-600 '>
-                                Use your right to vote right.
+                                Enter your valid details
                             </p>
                         </div>
                         <div className='flex flex-col justify-center items-center'>
-                            <VotingComponent onCapturedVotingData={handleCapturedVotingData} options={options} />
+                            <Register onCapturedRegister={handleCapturedRegister} />
                         </div>
                     </motion.div>
                 )}
@@ -276,4 +276,4 @@ function Voting() {
     )
 }
 
-export default Voting;
+export default RegisterVoter;
