@@ -4,7 +4,8 @@ import { motion } from 'framer-motion'
 import { useState } from 'react';
 import { Label } from '@/components/ui/label';
 import VotingComponent from '@/components/voting/VotingComponent';
-import axios from 'axios';
+import axiosInstance from '@/lib/axiosInstance';
+
 
 const steps = [
     {
@@ -28,14 +29,14 @@ const options = [
 ];
 
 function Voting() {
-    const [id, setID] = useState(1);
+    const [id, setID] = useState<string>('');
     const [image, setImage] = useState<string>('');
     const [votingData, setVotingData] = useState<string>('');
     const [previousStep, setPreviousStep] = useState(0)
     const [currentStep, setCurrentStep] = useState(0)
     const delta = currentStep - previousStep
 
-    const handleCapturedFingrePrint = (id) => {
+    const handleCapturedFingrePrint = (id: string) => {
         console.log('Received data from fingre:', id);
         setID(id);
     };
@@ -44,9 +45,33 @@ function Voting() {
         console.log('Received data from image:', data);
         setImage(data);
     };
-    const handleCapturedVotingData = (votingData) => {
-        console.log('Received data from voting:', votingData);
-        setVotingData(votingData)
+    const handleCapturedVotingData = (votingDataa) => {
+        console.log('Received data from voting:', votingDataa);
+        setVotingData(votingDataa)
+        const dataToSend = {
+            "group": votingDataa,
+            "candidate_name": "Aakhil",
+            "token": sessionStorage.getItem("token"),
+        };
+        const token = sessionStorage.getItem("token")
+
+        const headers = {
+            'Authorization': `Bearer ${token}`
+        };
+
+        console.log("FORMDATA:", dataToSend);
+        console.log("token", sessionStorage.getItem("token"))
+        axiosInstance
+            .post("/vote/", dataToSend, {
+                headers
+            })
+            .then((response) => {
+                console.log(response.data);
+                sessionStorage.removeItem("token");
+            })
+            .catch((error) => {
+                console.error("Error:", error);
+            });
     };
     console.log("Current Step : ", currentStep);
 
@@ -61,6 +86,10 @@ function Voting() {
                 }
             }
             if (currentStep === 1) {
+                if (sessionStorage.getItem("token") === null) {
+                    alert("Please capture your fingreprint");
+                    return;
+                }
                 if (id === '') {
                     alert("Please capture your fingreprint");
                     return;
@@ -79,16 +108,17 @@ function Voting() {
                     const formData = new FormData();
                     formData.append("imageid", blob, "image.jpg");
                     formData.append("fingerid", id);
-                    formData.append("votingdata", "apple");
+                    // formData.append("votingdata", "apple");
                     console.log("FORMDATA:", formData);
-                    axios
-                        .post("http://192.168.16.101:8000/auth/", formData, {
+                    axiosInstance
+                        .post("/auth/", formData, {
                             headers: {
                                 "Content-Type": "multipart/form-data",
                             },
                         })
                         .then((response) => {
                             console.log(response.data);
+                            sessionStorage.setItem("token", response.data.token);
                         })
                         .catch((error) => {
                             console.error("Error:", error);

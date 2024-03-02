@@ -50,7 +50,7 @@ function FingrePrint({ uses, onCapturedFingrePrint }: { uses: any, onCapturedFin
                 if (value.includes('\n')) {
                     if (chunkedData.includes('Found ID #')) {
                         setIDFound(chunkedData);
-                        const str = "Found ID #1 with confidence of 185";
+                        const str = chunkedData;
                         const regex = /ID #(\d+) /;
                         const match = str.match(regex);
 

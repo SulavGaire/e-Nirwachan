@@ -1,46 +1,41 @@
-import { zodResolver } from "@hookform/resolvers/zod"
-import { useForm } from "react-hook-form"
-import { z } from "zod"
-
 import { Button } from "@/components/ui/button"
-import {
-    Form,
-    FormControl,
-    FormDescription,
-    FormField,
-    FormItem,
-    FormLabel,
-    FormMessage,
-} from "@/components/ui/form"
-
 import { Input } from "@/components/ui/input"
-import axios from 'axios';
+import React, { useState } from 'react';
+import axiosInstance from '@/lib/axiosInstance';
+import { Label } from "@/components/ui/label";
 
+const RegisterCandidate: React.FC = () => {
+    const [name, setName] = useState('');
+    const [file, setFile] = useState<File | null>(null);
 
-const formSchema = z.object({
-    CandidateName: z.string().min(2, {
-        message: "CandidateName must be at least 2 characters.",
-    }),
-    image: z.string().refine((data) => { console.log(data); return true; }, { message: "Image is required." }),
-});
+    const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setName(e.target.value);
+    };
 
-const RegisterCandidate = () => {
-    const form = useForm<z.infer<typeof formSchema>>({
-        resolver: zodResolver(formSchema),
-        defaultValues: {
-            CandidateName: "",
-            image: undefined,
-        },
-    })
-    function onSubmit(values: z.infer<typeof formSchema>) {
-        console.log(values);
-        const formData = new FormData();
-        formData.append("CandidateName", values.CandidateName);
-        if (values.image) {
-            formData.append("Image", values.image);
+    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (e.target.files && e.target.files.length > 0) {
+            setFile(e.target.files[0]);
         }
-        axios
-            .post("http://192.168.16.101:8000/register/", formData, {
+    };
+
+    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
+
+        if (!file) {
+            console.error('No file selected');
+            return;
+        }
+        console.log("name", name);
+        console.log("image", file);
+
+
+        const formData = new FormData();
+        formData.append('CandidateName', name);
+        formData.append('Image', file);
+        console.log(formData);
+
+        axiosInstance
+            .post("/cregister/", formData, {
                 headers: {
                     "Content-Type": "multipart/form-data",
                 },
@@ -51,9 +46,10 @@ const RegisterCandidate = () => {
             .catch((error) => {
                 console.error("Error:", error);
             });
-    }
+    };
 
     return (
+
         <div className="flex flex-col justify-center items-center ">
             <div className="flex flex-row justify-center">
                 <div className="size-12">
@@ -65,46 +61,25 @@ const RegisterCandidate = () => {
             </div>
             <div className="flex flex-col justify-center items-center my-5 px-3">
 
-                <Form {...form} >
-                    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
-                        <FormField
-                            control={form.control}
-                            name="CandidateName"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>Candidate Name</FormLabel>
-                                    <FormControl>
-                                        <Input placeholder="Suresh" {...field} />
-                                    </FormControl>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-                        <FormField
-                            control={form.control}
-                            name="image"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>Image</FormLabel>
-                                    <FormDescription>Input your flag image or symbol </FormDescription>
-                                    <FormControl>
-                                        <Input type="file" accept='image/*' {...field} />
-                                    </FormControl>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
+                <form onSubmit={handleSubmit} encType="multipart/form-data" className="space-y-5">
+                    <Input
+                        type="text"
+                        placeholder="Enter name"
+                        value={name}
+                        onChange={handleNameChange}
+                    />
+                    <Label>
+                        Select Image
+                        <input type="file" onChange={handleFileChange} />
+                    </Label>
 
-                        <Button type="submit" className="py-5">Submit</Button>
-
-                    </form>
-                </Form>
+                    <Button type="submit">Upload Image</Button>
+                </form>
             </div>
         </div>
+    );
+};
 
-    )
-}
-
-export default RegisterCandidate
+export default RegisterCandidate;
 
 

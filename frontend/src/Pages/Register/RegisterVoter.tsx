@@ -3,7 +3,7 @@ import WebcamCapture from '@/components/WebcamComponent';
 import { motion } from 'framer-motion'
 import { useState } from 'react';
 import { Label } from '@/components/ui/label';
-import axios from 'axios';
+import axiosInstance from '@/lib/axiosInstance';
 import { Register } from '@/components/Register';
 
 const steps = [
@@ -22,14 +22,14 @@ const steps = [
 ]
 
 function RegisterVoter() {
-    const [id, setID] = useState<any>();
+    const [id, setID] = useState<string>('10');
     const [image, setImage] = useState<string>('');
     const [registerData, setRegisterData] = useState<string>('');
     const [previousStep, setPreviousStep] = useState(0)
     const [currentStep, setCurrentStep] = useState(0)
     const delta = currentStep - previousStep
 
-    const handleCapturedFingrePrint = (id) => {
+    const handleCapturedFingrePrint = (id: string) => {
         console.log('Received data from fingre:', id);
         setID(id);
     };
@@ -54,11 +54,11 @@ function RegisterVoter() {
             // Create FormData object and append the blob
             const formData = new FormData();
             formData.append("imageid", blob, "image.jpg");
-            formData.append("fingerid", 1);
+            formData.append("fingerid", id);
             formData.append("registerData", registerData);
             console.log("FORMDATA:", formData);
-            axios
-                .post("http://192.168.16.101:8000/register/", formData, {
+            axiosInstance
+                .post("/register/", formData, {
                     headers: {
                         "Content-Type": "multipart/form-data",
                     },
@@ -83,12 +83,12 @@ function RegisterVoter() {
                     return;
                 }
             }
-            // if (currentStep === 1) {
-            //     if (id === '') {
-            //         alert("Please capture your fingreprint");
-            //         return;
-            //     }
-            // }
+            if (currentStep === 1) {
+                if (id === '') {
+                    alert("Please capture your fingreprint");
+                    return;
+                }
+            }
             if (currentStep === 2) {
                 console.log("Voting Data : ", registerData);
                 if (registerData === '') {

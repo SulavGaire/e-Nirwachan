@@ -38,7 +38,6 @@ export function Register({ onCapturedRegister }) {
             MiddleName: "",
             LastName: "",
             CitizenshipNumber: "",
-            image: "",
         },
     })
     function onSubmit(values: z.infer<typeof formSchema>) {
