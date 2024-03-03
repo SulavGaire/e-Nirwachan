@@ -1,10 +1,12 @@
 import FingrePrint from '@/components/FingrePrint';
 import WebcamCapture from '@/components/WebcamComponent';
 import { motion } from 'framer-motion'
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Label } from '@/components/ui/label';
 import VotingComponent from '@/components/voting/VotingComponent';
 import axiosInstance from '@/lib/axiosInstance';
+import { Input } from '@/components/ui/input';
+import { useNavigate } from 'react-router-dom';
 
 
 const steps = [
@@ -22,20 +24,30 @@ const steps = [
     }
 ]
 
-const options = [
-    { value: 'Aakhil', avatar: 'https://th.bing.com/th/id/OIP.PPJ5FAl38tVVP-qGavD8tQHaE4?rs=1&pid=ImgDetMain', alt: 'Aakhil' },
-    { value: 'Nebi', avatar: 'https://th.bing.com/th/id/OIP.tAXbbQpns_qJ1bk_ZMy-9QAAAA?rs=1&pid=ImgDetMain', alt: 'Nebi' },
-    { value: 'Krantikari', avatar: 'https://th.bing.com/th/id/OIP.DauOLnEL1Lp9zx8pmUNQkwHaE0?rs=1&pid=ImgDetMain', alt: 'Krantikari' }
-];
+
 
 function Voting() {
-    const [id, setID] = useState<string>('');
+
+    const navigate = useNavigate();
+    const [id, setID] = useState<string>('1');
+    const [citizenshipNumber, setCitizenshipNumber] = useState<string>('');
     const [image, setImage] = useState<string>('');
     const [votingData, setVotingData] = useState<string>('');
     const [previousStep, setPreviousStep] = useState(0)
     const [currentStep, setCurrentStep] = useState(0)
     const delta = currentStep - previousStep
+    // console.log("citizrno", citizenshipNumber);
 
+    const [backendData, setBackendData] = useState([]);
+    useEffect(() => {
+        axiosInstance.get('/cinfo/')
+            .then((res) => {
+                console.log(res.data);
+                setBackendData(res.data);
+            }).catch((err) => {
+                console.log(err);
+            })
+    }, []); // Empty dependency array ensures this runs only once
     const handleCapturedFingrePrint = (id: string) => {
         console.log('Received data from fingre:', id);
         setID(id);
@@ -45,12 +57,21 @@ function Voting() {
         console.log('Received data from image:', data);
         setImage(data);
     };
-    const handleCapturedVotingData = (votingDataa) => {
-        console.log('Received data from voting:', votingDataa);
-        setVotingData(votingDataa)
+    const handleCapturedVotingData = ({ Party, Candidatecitizennum, Candidatename }) => {
+        console.log('Received data from voting:', Party, ": ", Candidatecitizennum);
+        // setVotingData(votingDataa)
+        const dateObj = new Date();
+        const month = (dateObj.getUTCMonth() + 1).toString().padStart(2, '0'); // Months are represented from 1 to 12.
+        const day = dateObj.getUTCDate().toString().padStart(2, '0');
+        const year = dateObj.getUTCFullYear();
+
+        // Formatted date in the format "YYYY/MM/DD":
+        const formattedDate = `${year}-${month}-${day}`;
         const dataToSend = {
-            "group": votingDataa,
-            "candidate_name": "Aakhil",
+            "Candidatename": Candidatename,
+            "Party": Party,
+            "Candidatecitizenshipnum": Candidatecitizennum,
+            "Date": formattedDate,
             "token": sessionStorage.getItem("token"),
         };
         const token = sessionStorage.getItem("token")
@@ -68,6 +89,7 @@ function Voting() {
             .then((response) => {
                 console.log(response.data);
                 sessionStorage.removeItem("token");
+                navigate('/')
             })
             .catch((error) => {
                 console.error("Error:", error);
@@ -84,12 +106,13 @@ function Voting() {
                     alert("Please capture your Image");
                     return;
                 }
-            }
-            if (currentStep === 1) {
-                if (sessionStorage.getItem("token") === null) {
-                    alert("Please capture your fingreprint");
+                if (citizenshipNumber === '') {
+                    alert("Please enter your citizenshipNumber");
                     return;
                 }
+            }
+            if (currentStep === 1) {
+
                 if (id === '') {
                     alert("Please capture your fingreprint");
                     return;
@@ -103,11 +126,14 @@ function Voting() {
                     }
                     const byteArray = new Uint8Array(byteNumbers);
                     const blob = new Blob([byteArray], { type: "image/jpeg" });
-
+                    console.log("FORMDATAcitizen:", citizenshipNumber);
+                    console.log("FORMDATAfid:", id);
+                    console.log("FORMDATA:", blob);
                     // Create FormData object and append the blob
                     const formData = new FormData();
-                    formData.append("imageid", blob, "image.jpg");
-                    formData.append("fingerid", id);
+                    formData.append("Citizenshipnum", citizenshipNumber);
+                    formData.append("Imageid", blob, "image.jpg");
+                    formData.append("Fingerid", id);
                     // formData.append("votingdata", "apple");
                     console.log("FORMDATA:", formData);
                     axiosInstance
@@ -117,8 +143,12 @@ function Voting() {
                             },
                         })
                         .then((response) => {
-                            console.log(response.data);
+                            console.log(response);
                             sessionStorage.setItem("token", response.data.token);
+                            if (response.data.error === "You have already voted") {
+                                alert("You have already voted");
+                                navigate('/')
+                            }
                         })
                         .catch((error) => {
                             console.error("Error:", error);
@@ -126,6 +156,10 @@ function Voting() {
                 }
             }
             if (currentStep === 2) {
+                if (sessionStorage.getItem("token") === null) {
+                    alert("Please capture your fingreprint");
+                    return;
+                }
                 console.log("Voting Data : ", votingData);
                 if (votingData === '') {
                     alert("Please capture your fingreprint");
@@ -144,6 +178,7 @@ function Voting() {
             setCurrentStep(step => step - 1)
         }
     }
+
     return (
         <div>
             <section className=' inset-0 flex flex-col justify-between p-6'>
@@ -201,6 +236,21 @@ function Voting() {
                                 Please your capture image for verifacation  purpose.
                             </p>
                         </div>
+                        <div className='flex flex-col justify-start w-52 gap-y-2'>
+
+                            <Label>Citizenship Number</Label>
+                            <Input
+                                value={citizenshipNumber}
+                                placeholder='Citizenship Number'
+                                required
+                                onChange={(e) => setCitizenshipNumber(e.target.value)}
+                            />
+                            <p className='text-red-400 text-sm'>* Enter your Citizenship Number</p>
+
+                        </div>
+
+
+
                         <div className='flex flex-col justify-center items-center'>
 
                             <WebcamCapture onCapturedImage={handleCapturedImage} />
@@ -248,7 +298,13 @@ function Voting() {
                             </p>
                         </div>
                         <div className='flex flex-col justify-center items-center'>
-                            <VotingComponent onCapturedVotingData={handleCapturedVotingData} options={options} />
+                            {sessionStorage.getItem("token") ? <VotingComponent onCapturedVotingData={handleCapturedVotingData} backendData={backendData} /> :
+                                <div className='flex flex-col justify-center'>
+                                    <p>NOT AUTHENTICATED </p>
+                                    <p>Try again ...</p>
+                                </div>
+                            }
+
                         </div>
                     </motion.div>
                 )}
@@ -261,7 +317,7 @@ function Voting() {
                             onClick={prev}
                             disabled={currentStep === 0}
                             className='rounded bg-white px-2 py-1 text-sm font-semibold text-sky-900 shadow-sm ring-1 ring-inset ring-sky-300 hover:bg-sky-50 disabled:cursor-not-allowed disabled:opacity-50'
-                        >
+                        ><Label>previous</Label>
                             <svg
                                 xmlns='http://www.w3.org/2000/svg'
                                 fill='none'
@@ -282,7 +338,7 @@ function Voting() {
                             onClick={next}
                             disabled={currentStep === steps.length - 1}
                             className='rounded bg-white px-2 py-1 text-sm font-semibold text-sky-900 shadow-sm ring-1 ring-inset ring-sky-300 hover:bg-sky-50 disabled:cursor-not-allowed disabled:opacity-50'
-                        >
+                        ><Label>next</Label>
                             <svg
                                 xmlns='http://www.w3.org/2000/svg'
                                 fill='none'

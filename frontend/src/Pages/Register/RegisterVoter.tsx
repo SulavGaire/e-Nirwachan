@@ -5,6 +5,8 @@ import { useState } from 'react';
 import { Label } from '@/components/ui/label';
 import axiosInstance from '@/lib/axiosInstance';
 import { Register } from '@/components/Register';
+import { useNavigate } from 'react-router-dom';
+import { useToast } from '@/components/ui/use-toast';
 
 const steps = [
     {
@@ -22,7 +24,9 @@ const steps = [
 ]
 
 function RegisterVoter() {
-    const [id, setID] = useState<string>('10');
+    const { toast } = useToast();
+    const navigate = useNavigate();
+    const [id, setID] = useState<string>('');
     const [image, setImage] = useState<string>('');
     const [registerData, setRegisterData] = useState<string>('');
     const [previousStep, setPreviousStep] = useState(0)
@@ -38,8 +42,8 @@ function RegisterVoter() {
         console.log('Received data from image:', data);
         setImage(data);
     };
+
     const handleCapturedRegister = (registerDataa) => {
-        console.log('Received data from voting:', registerDataa);
         setRegisterData(registerDataa)
         if (registerData) {
             // Convert base64 image data to blob
@@ -53,9 +57,15 @@ function RegisterVoter() {
 
             // Create FormData object and append the blob
             const formData = new FormData();
-            formData.append("imageid", blob, "image.jpg");
-            formData.append("fingerid", id);
-            formData.append("registerData", registerData);
+            formData.append("Imageid", blob, "image.jpg");
+            formData.append("Fingerid", id);
+            formData.append("Firstname", registerData.Firstname);
+            formData.append("Lastname", registerData.Lastname);
+            formData.append("Middlename", registerData.Middlename);
+            formData.append("Gender", registerData.Gender);
+            formData.append("Date_of_birth", registerData.Date_of_birth);
+            formData.append("Address", registerData.Address);
+            formData.append("Citizenshipnum", registerData.Citizenshipnum);
             console.log("FORMDATA:", formData);
             axiosInstance
                 .post("/register/", formData, {
@@ -64,7 +74,21 @@ function RegisterVoter() {
                     },
                 })
                 .then((response) => {
-                    console.log(response.data);
+                    console.log(response);
+                    if (response.status === 200) {
+                        navigate('/');
+                        toast({
+                            title: "Registration Successfull",
+                            description: response.data.title,
+                        });
+
+                    } else {
+                        navigate('/');
+                        toast({
+                            title: "Registration failed",
+                            description: response.data.title,
+                        })
+                    }
                 })
                 .catch((error) => {
                     console.error("Error:", error);
@@ -114,7 +138,7 @@ function RegisterVoter() {
                 {/* steps */}
                 <div className="flex flex-row justify-center">
                     <h1 className="font-semibold font-sans text-center text-3xl p-5 mb-5">
-                        Welcome To <span className='text-red-500'>Voter Pre-Registration</span> page
+                        Welcome To Voter<span className='text-red-500'> Pre-Registration</span> page
                     </h1>
                 </div>
                 <nav aria-label='Progress'>
@@ -232,6 +256,7 @@ function RegisterVoter() {
                             disabled={currentStep === 0}
                             className='rounded bg-white px-2 py-1 text-sm font-semibold text-sky-900 shadow-sm ring-1 ring-inset ring-sky-300 hover:bg-sky-50 disabled:cursor-not-allowed disabled:opacity-50'
                         >
+                            <Label>previous</Label>
                             <svg
                                 xmlns='http://www.w3.org/2000/svg'
                                 fill='none'
@@ -252,7 +277,7 @@ function RegisterVoter() {
                             onClick={next}
                             disabled={currentStep === steps.length - 1}
                             className='rounded bg-white px-2 py-1 text-sm font-semibold text-sky-900 shadow-sm ring-1 ring-inset ring-sky-300 hover:bg-sky-50 disabled:cursor-not-allowed disabled:opacity-50'
-                        >
+                        ><Label>next</Label>
                             <svg
                                 xmlns='http://www.w3.org/2000/svg'
                                 fill='none'

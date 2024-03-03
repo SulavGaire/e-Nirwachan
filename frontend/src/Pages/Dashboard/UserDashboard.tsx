@@ -1,6 +1,5 @@
 import Title from '@/components/dashboard/Title'
 // import ChartComponent from '@/components/dashboard/ChartComponent'
-
 const UserDashboard = () => {
 
     return (

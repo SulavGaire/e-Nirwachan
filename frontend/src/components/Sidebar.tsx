@@ -28,7 +28,7 @@ const AfterAuthRoutes = [
     {
         label: "Setting",
         icons: Settings,
-        href: '/*',
+        href: '/Setting',
         color: "text-emerald-500"
     },
 ]

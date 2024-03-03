@@ -17,24 +17,32 @@ import {
 } from "@/components/ui/form"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { useToast } from "@/components/ui/use-toast"
+import axiosInstance from '@/lib/axiosInstance';
+import React, { useState } from "react"
+import { candidateIMG } from "@/lib/candidateIMG";
 
 
-// const FormSchema = z.object({
-//     type: z.enum(["aakhil", "nebi", "kranti"], {
-//         required_error: "You need to select a notification type.",
-//     }),
-// })
+const VotingComponent = ({ onCapturedVotingData, backendData }) => {
 
-const VotingComponent = ({ onCapturedVotingData, options }) => {
+    // const options = [
+    //     { value: 'Aakhil', avatar: 'https://th.bing.com/th/id/OIP.PPJ5FAl38tVVP-qGavD8tQHaE4?rs=1&pid=ImgDetMain', alt: 'Aakhil' },
+    //     { value: 'Nebi', avatar: 'https://th.bing.com/th/id/OIP.tAXbbQpns_qJ1bk_ZMy-9QAAAA?rs=1&pid=ImgDetMain', alt: 'Nebi' },
+    //     { value: 'Krantikari', avatar: 'https://th.bing.com/th/id/OIP.DauOLnEL1Lp9zx8pmUNQkwHaE0?rs=1&pid=ImgDetMain', alt: 'Krantikari' }
+    // ];
     const { toast } = useToast()
 
+
+    console.log("backend", backendData);
+    const registeredImages = candidateIMG.filter((candidate) => {
+        return backendData.some((data) => data.Image === candidate.id.toString());
+    });
+
+    function searchByImage(imageValue) {
+        return backendData.filter(user => user.Image === imageValue);
+    }
+
     const FormSchema = z.object({
-        type: z.enum(
-            options.map((option) => option.value),
-            {
-                required_error: "You need to select a notification type.",
-            }
-        ),
+        type: z.string(),
     });
 
     const form = useForm<z.infer<typeof FormSchema>>({
@@ -42,12 +50,24 @@ const VotingComponent = ({ onCapturedVotingData, options }) => {
     })
 
     function onSubmit(data: z.infer<typeof FormSchema>) {
-        console.log(data);
-        onCapturedVotingData(data.type)
-        toast({
-            title: "Voting Success",
-            description: <>You voted to{" "} <span style={{ color: 'red', fontWeight: 'bold' }}>{data.type}</span>. Thanks for your participation!</>,
-        });
+        console.log("Submitted data", data);
+        const Party = searchByImage(data.type)[0].Party;
+        const Candidatecitizennum = searchByImage(data.type)[0].Citizenshipnum;
+        const Candidatename = searchByImage(data.type)[0].Firstname;
+        if (Party && Candidatecitizennum && Candidatename) {
+            // console.log("Voting Success", { party, Candidatecitizennum });
+            onCapturedVotingData({ Party, Candidatecitizennum, Candidatename });
+            toast({
+                title: "Voting Success",
+                description: <>You voted to{" "} <span style={{ color: 'red', fontWeight: 'bold' }}>{searchByImage(data.type)[0].Firstname}</span>. Thanks for your participation!</>,
+            });
+        } else {
+            toast({
+                title: "Error",
+                description: "Error in Voting",
+            });
+        }
+
     }
     return (
         <div className="flex flex-col justify-center items-center px-3">
@@ -65,20 +85,29 @@ const VotingComponent = ({ onCapturedVotingData, options }) => {
                                         defaultValue={field.value}
                                         className="flex flex-col space-y-1"
                                     >
-                                        {options.map((option) => (
+                                        {registeredImages.map((option) => (
                                             <FormItem
-                                                key={option.value}
+                                                key={option.id}
                                                 className="flex items-center space-x-3 space-y-0"
                                             >
                                                 <FormControl>
-                                                    <RadioGroupItem value={option.value} />
+                                                    <RadioGroupItem value={option.id.toString()} />
                                                 </FormControl>
                                                 <Avatar>
-                                                    <AvatarImage src={option.avatar} alt={option.alt} />
-                                                    <AvatarFallback>{option.alt}</AvatarFallback>
+                                                    <AvatarImage src={option.img} alt={option.id} />
+                                                    <AvatarFallback>{option.id}</AvatarFallback>
                                                 </Avatar>
-                                                <FormLabel className="font-normal">
-                                                    {option.value}
+                                                <FormLabel className="flex flex-row">
+
+                                                    {searchByImage(option.id.toString())[0].Firstname}
+                                                    {searchByImage(option.id.toString())[0].Middlename}
+                                                    {searchByImage(option.id.toString())[0].Lastname}
+
+                                                </FormLabel>
+                                                <FormLabel className="flex flex-row font-semibold">
+                                                    (
+                                                    {searchByImage(option.id.toString())[0].Party}
+                                                    )
                                                 </FormLabel>
                                             </FormItem>
                                         ))}
@@ -88,49 +117,7 @@ const VotingComponent = ({ onCapturedVotingData, options }) => {
                             </FormItem>
                         )}
                     />
-                    {/* <FormItem className="flex items-center space-x-3 space-y-0">
-                                            <FormControl>
-                                                <RadioGroupItem value="aakhil" />
-                                            </FormControl>
-                                            <Avatar>
-                                                <AvatarImage src="https://th.bing.com/th/id/OIP.PPJ5FAl38tVVP-qGavD8tQHaE4?rs=1&pid=ImgDetMain" alt="Aaklil" />
-                                                <AvatarFallback>Aaklil</AvatarFallback>
-                                            </Avatar>
-                                            <FormLabel className="font-normal">
-                                                Aakhil
-                                            </FormLabel>
-                                        </FormItem>
-                                        <FormItem className="flex items-center space-x-3 space-y-0">
-                                            <FormControl>
-                                                <RadioGroupItem value="nebi" />
-                                            </FormControl>
-                                            <Avatar>
-                                                <AvatarImage src="https://th.bing.com/th/id/OIP.tAXbbQpns_qJ1bk_ZMy-9QAAAA?rs=1&pid=ImgDetMain" alt="Nebi" />
-                                                <AvatarFallback>nebi</AvatarFallback>
-                                            </Avatar>
-                                            <FormLabel className="font-normal">
 
-                                                Nebi
-                                            </FormLabel>
-                                        </FormItem>
-                                        <FormItem className="flex items-center space-x-3 space-y-0">
-                                            <FormControl>
-                                                <RadioGroupItem value="kranti" />
-                                            </FormControl>
-                                            <Avatar>
-                                                <AvatarImage src="https://th.bing.com/th/id/OIP.DauOLnEL1Lp9zx8pmUNQkwHaE0?rs=1&pid=ImgDetMain" alt="Kranti" />
-                                                <AvatarFallback>Kranti</AvatarFallback>
-                                            </Avatar>
-                                            <FormLabel className="font-normal">
-                                                Krantikari
-                                            </FormLabel>
-                                        </FormItem>
-                                    </RadioGroup>
-                                </FormControl>
-                                <FormMessage />
-                            </FormItem>
-                        )}
-                    /> */}
                     <Button type="submit">Submit</Button>
                 </form>
             </Form>

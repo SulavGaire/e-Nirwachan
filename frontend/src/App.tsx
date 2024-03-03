@@ -1,23 +1,26 @@
 import './App.css'
 import Layout from './Layout'
 import NoPage from './NoPage'
-import { Register } from './components/Register'
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import AdminDashboard from './Pages/Dashboard/AdminDashboard'
 import UserDashboard from './Pages/Dashboard/UserDashboard'
 import Voting from './Pages/Voting/Voting'
-// import Voting from './components/voting/voting'
 import { Toaster } from "@/components/ui/toaster"
 import Login from './Pages/Login'
 import { useAuth } from './contexts/AuthContext';
-import Suresh from './Pages/Suresh2';
 import RegisterVoter from './Pages/Register/RegisterVoter';
 import RegisterCandidate from './Pages/Register/RegisterCandidate';
+import Setting from './Pages/Setting';
+// import VotingComponent from './components/voting/VotingComponent';
 
 
 
 function App() {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, setIsAuthenticated } = useAuth();
+  if (localStorage.getItem('token')) {
+    setIsAuthenticated?.(true);
+  }
+
   return (
     <BrowserRouter>
       {/* <Suresh /> */}
@@ -36,6 +39,7 @@ const AfterAuthRoutes = () => {
         <Route index element={<AdminDashboard />} />
         <Route path="Voting" element={<Voting />} />
         <Route path="Register" element={<RegisterCandidate />} />
+        <Route path="Setting" element={<Setting />} />
         <Route path="*" element={<NoPage />} />
       </Route>
     </Routes>

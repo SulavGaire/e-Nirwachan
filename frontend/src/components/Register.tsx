@@ -15,29 +15,37 @@ import {
 
 import { Input } from "@/components/ui/input"
 
-
-
 const formSchema = z.object({
-    FirstName: z.string().min(2, {
+    Firstname: z.string().min(2, {
         message: "FirstName must be at least 2 characters.",
     }),
-    MiddleName: z.string(),
-    LastName: z.string().min(2, {
+    Middlename: z.string(),
+    Lastname: z.string().min(2, {
         message: "LastName must be at least 2 characters.",
     }),
-    CitizenshipNumber: z.string().min(10, {
+    Citizenshipnum: z.string().min(10, {
         message: "CitizenshipNumber must be at least 10 characters.",
     }),
+    Address: z.string().min(2, {
+        message: "Address must be at least 2 characters.",
+    }),
+    Date_of_birth: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, {
+        message: "Date_of_Birth must be in the format YYYY-MM-DD",
+    }),
+    Gender: z.enum(["Male", "Female", "Other"]),
 })
 
 export function Register({ onCapturedRegister }) {
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
         defaultValues: {
-            FirstName: "",
-            MiddleName: "",
-            LastName: "",
-            CitizenshipNumber: "",
+            Firstname: "",
+            Middlename: "",
+            Lastname: "",
+            Citizenshipnum: "",
+            Address: "",
+            Date_of_birth: "",
+            Gender: "Male",
         },
     })
     function onSubmit(values: z.infer<typeof formSchema>) {
@@ -54,7 +62,7 @@ export function Register({ onCapturedRegister }) {
                         <div className="flex flex-col md:flex-row md:min-w-full gap-4">
                             <FormField
                                 control={form.control}
-                                name="FirstName"
+                                name="Firstname"
                                 render={({ field }) => (
                                     <FormItem>
                                         <FormLabel>First Name</FormLabel>
@@ -67,7 +75,7 @@ export function Register({ onCapturedRegister }) {
                             />
                             <FormField
                                 control={form.control}
-                                name="MiddleName"
+                                name="Middlename"
                                 render={({ field }) => (
                                     <FormItem>
                                         <FormLabel>Middle Name</FormLabel>
@@ -80,7 +88,7 @@ export function Register({ onCapturedRegister }) {
                             />
                             <FormField
                                 control={form.control}
-                                name="LastName"
+                                name="Lastname"
                                 render={({ field }) => (
                                     <FormItem>
                                         <FormLabel>Last Name</FormLabel>
@@ -94,7 +102,7 @@ export function Register({ onCapturedRegister }) {
                         </div>
                         <FormField
                             control={form.control}
-                            name="CitizenshipNumber"
+                            name="Citizenshipnum"
                             render={({ field }) => (
                                 <FormItem>
                                     <FormLabel>Citizenship Number</FormLabel>
@@ -108,9 +116,62 @@ export function Register({ onCapturedRegister }) {
                                 </FormItem>
                             )}
                         />
+                        <FormField
+                            control={form.control}
+                            name="Address"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Address</FormLabel>
+                                    <FormControl>
+                                        <Input placeholder=" Lamachaur Pokhara" {...field} />
+                                    </FormControl>
+                                    <FormDescription>
+                                        Enter a valid address
+                                    </FormDescription>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+                        <FormField
+                            control={form.control}
+                            name="Date_of_birth"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Date of Birth</FormLabel>
+                                    <FormControl>
+                                        <Input type="date" {...field} />
+                                    </FormControl>
+                                    <FormDescription>
+                                        Enter valid Date of Birth
+                                    </FormDescription>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+                        <FormField
+                            control={form.control}
+                            name="Gender"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel className="mr-4">Gender</FormLabel>
+                                    <FormControl>
+                                        <select {...field}>
+                                            <option value="Male">Male</option>
+                                            <option value="Female">Female</option>
+                                            <option value="Other">Other</option>
+                                        </select>
+                                    </FormControl>
+                                    <FormDescription>
+
+                                    </FormDescription>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+
 
                         <div>
-                            <Button type="submit" className="m-8">Submit</Button>
+                            <Button type="submit" className="mt-5">Submit</Button>
                         </div>
                     </form>
                 </Form>
